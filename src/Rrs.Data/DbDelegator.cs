@@ -22,14 +22,14 @@ namespace Rrs.Data
             }
         }
 
-        public void Execute(Action<IDbConnection, IDbTransaction> command)
+        public void Execute(Action<IDbTransaction> command, IsolationLevel isolationLevel)
         {
             using (var c = _connectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    _dataBus.Execute(() => command.Invoke(c, t), command.Method.Name);
+                    _dataBus.Execute(() => command.Invoke(t), command.Method.Name);
                     t.Commit();
                 }
                 finally
@@ -47,14 +47,14 @@ namespace Rrs.Data
             }
         }
 
-        public void Execute<T>(Action<IDbConnection, IDbTransaction, T> command, T parameter)
+        public void Execute<T>(Action<IDbTransaction, T> command, T parameter, IsolationLevel isolationLevel)
         {
             using (var c = _connectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    _dataBus.Execute(p => command.Invoke(c, t, p), parameter, command.Method.Name);
+                    _dataBus.Execute(p => command.Invoke(t, p), parameter, command.Method.Name);
                     t.Commit();
                 }
                 finally
@@ -72,14 +72,14 @@ namespace Rrs.Data
             }
         }
 
-        public T Execute<T>(Func<IDbConnection, IDbTransaction, T> query)
+        public T Execute<T>(Func<IDbTransaction, T> query, IsolationLevel isolationLevel)
         {
             using (var c = _connectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    var r = _dataBus.Execute(() => query.Invoke(c, t), query.Method.Name);
+                    var r = _dataBus.Execute(() => query.Invoke(t), query.Method.Name);
                     t.Commit();
                     return r;
                 }
@@ -98,14 +98,14 @@ namespace Rrs.Data
             }
         }
 
-        public TOut Execute<TIn, TOut>(Func<IDbConnection,IDbTransaction, TIn, TOut> query, TIn parameter)
+        public TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter, IsolationLevel isolationLevel)
         {
             using (var c = _connectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    var r = _dataBus.Execute(p => query.Invoke(c, t, p), parameter, query.Method.Name);
+                    var r = _dataBus.Execute(p => query.Invoke(t, p), parameter, query.Method.Name);
                     t.Commit();
                     return r;
                 }

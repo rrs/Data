@@ -5,9 +5,9 @@ namespace Rrs.Data
 {
     public interface IDbTransactionalDelegator
     {
-        void Execute(Action<IDbConnection, IDbTransaction> command);
-        void Execute<T>(Action<IDbConnection, IDbTransaction, T> command, T parameter);
-        T Execute<T>(Func<IDbConnection, IDbTransaction, T> query);
-        TOut Execute<TIn, TOut>(Func<IDbConnection, IDbTransaction, TIn, TOut> query, TIn parameter);
+        void Execute(Action<IDbTransaction> command, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        void Execute<T>(Action<IDbTransaction, T> command, T parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        T Execute<T>(Func<IDbTransaction, T> query, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
     }
 }

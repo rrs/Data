@@ -24,9 +24,8 @@ namespace Tests.Rrs.Data
             _f.MockDbTransaction.Verify(o => o.Commit());
         }
 
-        private static void Command(IDbConnection c, IDbTransaction t)
+        private static void Command(IDbTransaction t)
         {
-            Assert.IsNotNull(c);
             Assert.IsNotNull(t);
         }
 
@@ -37,7 +36,7 @@ namespace Tests.Rrs.Data
             _f.MockDbTransaction.Verify(o => o.Rollback());
         }
 
-        private static void ExceptionCommand(IDbConnection c, IDbTransaction t)
+        private static void ExceptionCommand(IDbTransaction t)
         {
             throw new Exception();
         }
@@ -45,9 +44,9 @@ namespace Tests.Rrs.Data
         [Test]
         public void TestCommandWithABasicParameter() => _q.Execute(Command, new DateTime(2001,2,3,4,5,6));
 
-        private static void Command(IDbConnection c, IDbTransaction t, DateTime p)
+        private static void Command(IDbTransaction t, DateTime p)
         {
-            Assert.IsNotNull(c);
+            Assert.IsNotNull(t);
             Assert.AreEqual(new DateTime(2001, 2, 3, 4, 5, 6), p);
         }
 
