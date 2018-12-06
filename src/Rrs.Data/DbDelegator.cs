@@ -5,14 +5,13 @@ namespace Rrs.Data
 {
     public class DbDelegator : IDbDelegator
     {
-        private readonly IDataBus _dataBus = new DefaultDataBus();
-
         private readonly IDbConnectionFactory _connectionFactory;
+        private readonly IDataBus _dataBus;
 
         public DbDelegator(IDbConnectionFactory connectionFactory, IDataBus dataBus = null)
         {
-            _dataBus = dataBus ?? new DefaultDataBus();
             _connectionFactory = connectionFactory;
+            _dataBus = dataBus ?? new DefaultDataBus();
         }
 
         public void Execute(Action<IDbConnection> command)
