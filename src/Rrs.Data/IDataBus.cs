@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Rrs.Data
 {
     public interface IDataBus
     {
-        void Execute(Action command, string methodName = null);
-        void Execute<T>(Action<T> command, T parameter, string methodName = null);
-        T Execute<T>(Func<T> query, string methodName = null);
-        TOut Execute<TIn, TOut>(Func<TIn, TOut> query, TIn parameter, string methodName = null);
+        void Execute(Action command, MethodInfo originalMethod = null);
+        void Execute<T>(Action<T> command, T parameter, MethodInfo originalMethod = null);
+        T Execute<T>(Func<T> query, MethodInfo originalMethod = null);
+        TOut Execute<TIn, TOut>(Func<TIn, TOut> query, TIn parameter, MethodInfo originalMethod = null);
     }
 }

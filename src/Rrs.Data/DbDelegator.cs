@@ -6,19 +6,19 @@ namespace Rrs.Data
     public class DbDelegator : IDbDelegator
     {
         private readonly IDbConnectionFactory _connectionFactory;
-        private readonly IDataBus _dataBus;
+        public IDataBus DataBus { get; set; }
 
         public DbDelegator(IDbConnectionFactory connectionFactory, IDataBus dataBus = null)
         {
             _connectionFactory = connectionFactory;
-            _dataBus = dataBus ?? new DefaultDataBus();
+            DataBus = dataBus ?? new DefaultDataBus();
         }
 
         public void Execute(Action<IDbConnection> command)
         {
             using (var c = _connectionFactory.OpenConnection())
             {
-                _dataBus.Execute(() => command(c), command.Method.Name);
+                DataBus.Execute(() => command(c), command.Method);
             }
         }
 
@@ -29,7 +29,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    _dataBus.Execute(() => command.Invoke(t), command.Method.Name);
+                    DataBus.Execute(() => command.Invoke(t), command.Method);
                     t.Commit();
                 }
                 finally
@@ -43,7 +43,7 @@ namespace Rrs.Data
         {
             using (var c = _connectionFactory.OpenConnection())
             {
-                _dataBus.Execute(p => command.Invoke(c, p), parameter, command.Method.Name);
+                DataBus.Execute(p => command.Invoke(c, p), parameter, command.Method);
             }
         }
 
@@ -54,7 +54,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    _dataBus.Execute(p => command.Invoke(t, p), parameter, command.Method.Name);
+                    DataBus.Execute(p => command.Invoke(t, p), parameter, command.Method);
                     t.Commit();
                 }
                 finally
@@ -68,7 +68,7 @@ namespace Rrs.Data
         {
             using (var c = _connectionFactory.OpenConnection())
             {
-                return _dataBus.Execute(() => query.Invoke(c), query.Method.Name);
+                return DataBus.Execute(() => query.Invoke(c), query.Method);
             }
         }
 
@@ -79,7 +79,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    var r = _dataBus.Execute(() => query.Invoke(t), query.Method.Name);
+                    var r = DataBus.Execute(() => query.Invoke(t), query.Method);
                     t.Commit();
                     return r;
                 }
@@ -94,7 +94,7 @@ namespace Rrs.Data
         {
             using (var c = _connectionFactory.OpenConnection())
             {
-                return _dataBus.Execute(p => query.Invoke(c, p), parameter, query.Method.Name);
+                return DataBus.Execute(p => query.Invoke(c, p), parameter, query.Method);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    var r = _dataBus.Execute(p => query.Invoke(t, p), parameter, query.Method.Name);
+                    var r = DataBus.Execute(p => query.Invoke(t, p), parameter, query.Method);
                     t.Commit();
                     return r;
                 }
