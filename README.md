@@ -116,6 +116,7 @@ private DateTime UserRecordGetLastAccessed(IDbTransaction t, Guid userId)
 
 The transaction is commited at the end of execute. If you want to section off different parts of a query just compose them
 
+```
 private void SomethingUseful(IDbTransaction t)
 {
     PartA(t);
@@ -131,3 +132,5 @@ private void PartB(IDbTransaction t)
 {
     
 }
+
+```
