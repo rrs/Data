@@ -1,6 +1,6 @@
 Rrs.Data
 ========
-A simple library to minimise code bloat from repetitive database access code. For use with other libraries or code that relies on IDbConnection and IDbTransaction
+A simple library to minimise code bloat from repetitive database access code. For use with other libraries or code that relies on IDbConnection and IDbTransaction such as Dapper or my dapper wrapper [DapperFluent](https://github.com/rrs/DapperFluent)
 
 Usage
 -----
