@@ -5,19 +5,19 @@ A simple library to minimise code bloat from repetitive database access code. Fo
 Usage
 -----
 
-# IDbConnectionFactory
+### IDbConnectionFactory
 
 Requires an implementation of IDbConnectionFactory
 
 [Sql Server Implementation](https://github.com/rrs/DataSqlServer)
 
-# Function Signatures
+### Function Signatures
 
 Once you have an instance of IDbDelegator you can call .Execute on it. It accepts a minimum set of function signatures to be able to do all the necessary db access you might require.
 
-## Non transactional
+#### Non transactional
 
-### Action<IDbConnection>
+##### Action<IDbConnection>
  
  Any void function with a parameter of IDbConnection
 
@@ -38,7 +38,7 @@ private void UpdateUserRecordLastAccessed(IDbConnection c)
 
 ```
 
-### Action<IDbConnection, T>
+##### Action<IDbConnection, T>
 
  Any void function with a parameter of IDbConnection and a second paramter of type T
 
@@ -57,7 +57,7 @@ private void UpdateUserRecordLastAccessed2(IDbConnection c, DateTime now)
 
 ```
 
-### Func<IDbConnection, T>
+##### Func<IDbConnection, T>
 
 Any function with a parameter of IDbConnection and a return type of T 
 
@@ -76,7 +76,7 @@ private DateTime GetLastAccessedUserDate(IDbConnection c)
 
 ```
 
-### Func<IDbConnection, TIn, TOut>
+##### Func<IDbConnection, TIn, TOut>
 
 Any function with a parameter of IDbConnection and another of type TIn a return type of TOut
 
@@ -95,7 +95,7 @@ private DateTime UserRecordGetLastAccessed(IDbConnection c, Guid userId)
 
 ```
 
-## Transactional
+#### Transactional
 
 These are the same as the non transactional but you replace IDbConnection with IDbTransaction
 
