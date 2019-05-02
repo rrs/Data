@@ -2,6 +2,6 @@
 {
     public interface IDbDelegator : IDbNonTransactionalDelegator, IDbTransactionalDelegator
     {
-        IDataBus DataBus { get; set; }
+        IDelegatorBus DelegatorBus { get; set; }
     }
 }

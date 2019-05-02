@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Rrs.Data
 {
-    public interface IDataBus
+    public interface IDelegatorBus
     {
         void Execute(Action command, MethodInfo originalMethod = null);
         void Execute<T>(Action<T> command, T parameter, MethodInfo originalMethod = null);
