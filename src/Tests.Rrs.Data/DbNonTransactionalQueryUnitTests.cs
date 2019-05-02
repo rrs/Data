@@ -67,5 +67,19 @@ namespace Tests.Rrs.Data
             Assert.IsNotNull(c);
             return new TestObject(p, "Gaaary");
         }
+
+        [Test]
+        public void QueryAccepts2Parameters()
+        {
+            var r = _q.Execute(QueryWith2Paramters, 1, 2);
+            Assert.AreEqual(3, r.Id);
+            Assert.AreEqual("Baaary", r.Name);
+        }
+
+        private TestObject QueryWith2Paramters(IDbConnection c, int a, int b)
+        {
+            Assert.IsNotNull(c);
+            return new TestObject(a + b, "Baaary");
+        }
     }
 }
