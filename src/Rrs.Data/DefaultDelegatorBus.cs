@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Rrs.Data
 {
-    public class DefaultDelegatorBus : IDelegatorBus
+    public partial class DefaultDelegatorBus
     {
-        public void Execute(Action command, MethodInfo originalMethod = null)
+        public Task ExecuteAsync(Func<Task> command, MethodInfo originalMethod = null)
         {
-            command();
+            return command();
         }
 
-        public void Execute<T>(Action<T> command, T parameter, MethodInfo originalMethod = null)
+        public Task ExecuteAsync<T>(Func<T, Task> command, T parameter, MethodInfo originalMethod = null)
         {
-            command(parameter);
+            return command(parameter);
         }
 
-        public T Execute<T>(Func<T> query, MethodInfo originalMethod = null)
+        public Task<T> ExecuteAsync<T>(Func<Task<T>> query, MethodInfo originalMethod = null)
         {
             return query();
         }
 
-        public TOut Execute<TIn, TOut>(Func<TIn, TOut> query, TIn parameter, MethodInfo originalMethod = null)
+        public Task<TOut> ExecuteAsync<TIn, TOut>(Func<TIn, Task<TOut>> query, TIn parameter, MethodInfo originalMethod = null)
         {
             return query(parameter);
         }

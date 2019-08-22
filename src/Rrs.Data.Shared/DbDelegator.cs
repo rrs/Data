@@ -1,27 +1,85 @@
 ﻿using System;
 using System.Data;
-using System.Threading.Tasks;
 
 namespace Rrs.Data
 {
-    public partial class DbDelegator
+    public partial class DbDelegator : IDbDelegator
     {
-        public Task ExecuteAsync(Func<IDbConnection, Task> command)
+        private readonly IDbConnectionFactory _connectionFactory;
+        public IDelegatorBus DelegatorBus { get; set; }
+
+        public DbDelegator(IDbConnectionFactory connectionFactory, IDelegatorBus delegatorBus = null)
+        {
+            _connectionFactory = connectionFactory;
+            DelegatorBus = delegatorBus ?? new DefaultDelegatorBus();
+        }
+
+        public void Execute(Action<IDbConnection> command)
         {
             using (var c = _connectionFactory.OpenConnection())
             {
-                return DelegatorBus.ExecuteAsync(() => command(c), command.Method);
+                DelegatorBus.Execute(() => command(c), command.Method);
             }
         }
 
-        public Task ExecuteAsync(Func<IDbTransaction, Task> command, IsolationLevel isolationLevel)
+        public void Execute(Action<IDbTransaction> command, IsolationLevel isolationLevel)
         {
             using (var c = _connectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    var r = DelegatorBus.ExecuteAsync(() => command.Invoke(t), command.Method);
+                    DelegatorBus.Execute(() => command.Invoke(t), command.Method);
+                    t.Commit();
+                }
+                finally
+                {
+                    t.Rollback();
+                }
+            }
+        }
+
+        public void Execute<T>(Action<IDbConnection, T> command, T parameter)
+        {
+            using (var c = _connectionFactory.OpenConnection())
+            {
+                DelegatorBus.Execute(p => command.Invoke(c, p), parameter, command.Method);
+            }
+        }
+
+        public void Execute<T>(Action<IDbTransaction, T> command, T parameter, IsolationLevel isolationLevel)
+        {
+            using (var c = _connectionFactory.OpenConnection())
+            using (var t = c.BeginTransaction())
+            {
+                try
+                {
+                    DelegatorBus.Execute(p => command.Invoke(t, p), parameter, command.Method);
+                    t.Commit();
+                }
+                finally
+                {
+                    t.Rollback();
+                }
+            }
+        }
+
+        public T Execute<T>(Func<IDbConnection, T> query)
+        {
+            using (var c = _connectionFactory.OpenConnection())
+            {
+                return DelegatorBus.Execute(() => query.Invoke(c), query.Method);
+            }
+        }
+
+        public T Execute<T>(Func<IDbTransaction, T> query, IsolationLevel isolationLevel)
+        {
+            using (var c = _connectionFactory.OpenConnection())
+            using (var t = c.BeginTransaction())
+            {
+                try
+                {
+                    var r = DelegatorBus.Execute(() => query.Invoke(t), query.Method);
                     t.Commit();
                     return r;
                 }
@@ -32,74 +90,22 @@ namespace Rrs.Data
             }
         }
 
-        public Task ExecuteAsync<T>(Func<IDbConnection, T, Task> command, T parameter)
+        public TOut Execute<TIn, TOut>(Func<IDbConnection, TIn, TOut> query, TIn parameter)
         {
             using (var c = _connectionFactory.OpenConnection())
             {
-                return DelegatorBus.ExecuteAsync(p => command.Invoke(c, p), parameter, command.Method);
+                return DelegatorBus.Execute(p => query.Invoke(c, p), parameter, query.Method);
             }
         }
 
-        public Task ExecuteAsync<T>(Func<IDbTransaction, T, Task> command, T parameter, IsolationLevel isolationLevel)
+        public TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter, IsolationLevel isolationLevel)
         {
             using (var c = _connectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    var r = DelegatorBus.ExecuteAsync(p => command.Invoke(t, p), parameter, command.Method);
-                    t.Commit();
-                    return r;
-                }
-                finally
-                {
-                    t.Rollback();
-                }
-            }
-        }
-
-        public Task<T> ExecuteAsync<T>(Func<IDbConnection, Task<T>> query)
-        {
-            using (var c = _connectionFactory.OpenConnection())
-            {
-                return DelegatorBus.ExecuteAsync(() => query.Invoke(c), query.Method);
-            }
-        }
-
-        public Task<T> ExecuteAsync<T>(Func<IDbTransaction, Task<T>> query, IsolationLevel isolationLevel)
-        {
-            using (var c = _connectionFactory.OpenConnection())
-            using (var t = c.BeginTransaction())
-            {
-                try
-                {
-                    var r = DelegatorBus.ExecuteAsync(() => query.Invoke(t), query.Method);
-                    t.Commit();
-                    return r;
-                }
-                finally
-                {
-                    t.Rollback();
-                }
-            }
-        }
-
-        public Task<TOut> ExecuteAsync<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter)
-        {
-            using (var c = _connectionFactory.OpenConnection())
-            {
-                return DelegatorBus.ExecuteAsync(p => query.Invoke(c, p), parameter, query.Method);
-            }
-        }
-
-        public Task<TOut> ExecuteAsync<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, IsolationLevel isolationLevel)
-        {
-            using (var c = _connectionFactory.OpenConnection())
-            using (var t = c.BeginTransaction())
-            {
-                try
-                {
-                    var r = DelegatorBus.ExecuteAsync(p => query.Invoke(t, p), parameter, query.Method);
+                    var r = DelegatorBus.Execute(p => query.Invoke(t, p), parameter, query.Method);
                     t.Commit();
                     return r;
                 }

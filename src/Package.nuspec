@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>Rrs.Data</id>
+        <version>1.0.0</version>
+        <authors>Robert Snipe</authors>
+        <owners>Robert Snipe</owners>
+        <projectUrl>https://github.com/rrs/Data</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Rrs.Data Class Library</description>
+        <copyright>Copyright (c) 2018 Robert Snipe</copyright>
+        <tags>Data Net40 Standard20</tags>
+    </metadata>
+    <files>
+        <file src="Rrs.Data.Net40\bin\Release\net40\**" target="lib\net40\Rrs.Data.dll" />
+        <file src="Rrs.Data\bin\Release\netstandard2.0\**" target="lib\netstandard20\Rrs.Data.dll" />
+    </files>
+</package>

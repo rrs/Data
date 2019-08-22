@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using Rrs.Data;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Tests.Rrs.Data
 {
@@ -27,6 +28,18 @@ namespace Tests.Rrs.Data
             return "Moooo!";
         }
 
+        public void QueryAsyncGetsABasicValue()
+        {
+            var r = _q.ExecuteAsync(QueryAsync).Result;
+            Assert.AreEqual("Moooo!", r);
+        }
+
+        private Task<string> QueryAsync(IDbConnection c)
+        {
+            Assert.IsNotNull(c);
+            return Task.FromResult("Moooo!");
+        }
+
         [Test]
         public void QueryGetsAnObject()
         {
@@ -42,6 +55,20 @@ namespace Tests.Rrs.Data
         }
 
         [Test]
+        public void QueryAsyncGetsAnObject()
+        {
+            var r = _q.ExecuteAsync(QueryAsyncReturnsAnObject).Result;
+            Assert.AreEqual(2, r.Id);
+            Assert.AreEqual("Wilbur", r.Name);
+        }
+
+        private Task<TestObject> QueryAsyncReturnsAnObject(IDbConnection c)
+        {
+            Assert.IsNotNull(c);
+            return Task.FromResult(new TestObject(2, "Wilbur"));
+        }
+
+        [Test]
         public void QueryGetsABasicValueFromABasicValue()
         {
             var r = _q.Execute(Query, 717);
@@ -52,6 +79,19 @@ namespace Tests.Rrs.Data
         {
             Assert.IsNotNull(c);
             return p;
+        }
+
+        [Test]
+        public void QueryAsyncGetsABasicValueFromABasicValue()
+        {
+            var r = _q.ExecuteAsync(QueryAsync, 717).Result;
+            Assert.AreEqual(717, r);
+        }
+
+        private Task<int> QueryAsync(IDbConnection c, int p)
+        {
+            Assert.IsNotNull(c);
+            return Task.FromResult(p);
         }
 
         [Test]
@@ -69,6 +109,20 @@ namespace Tests.Rrs.Data
         }
 
         [Test]
+        public void QueryAsyncGetsAnObjectFromABasicValue()
+        {
+            var r = _q.ExecuteAsync(QueryAsyncReturnsAnObject, 909).Result;
+            Assert.AreEqual(909, r.Id);
+            Assert.AreEqual("Gaaary", r.Name);
+        }
+
+        private Task<TestObject> QueryAsyncReturnsAnObject(IDbConnection c, int p)
+        {
+            Assert.IsNotNull(c);
+            return Task.FromResult(new TestObject(p, "Gaaary"));
+        }
+
+        [Test]
         public void QueryAccepts2Parameters()
         {
             var r = _q.Execute(QueryWith2Paramters, 1, 2);
@@ -80,6 +134,20 @@ namespace Tests.Rrs.Data
         {
             Assert.IsNotNull(c);
             return new TestObject(a + b, "Baaary");
+        }
+
+        [Test]
+        public void QueryAsyncAccepts2Parameters()
+        {
+            var r = _q.ExecuteAsync(QueryAsyncWith2Paramters, 1, 2).Result;
+            Assert.AreEqual(3, r.Id);
+            Assert.AreEqual("Baaary", r.Name);
+        }
+
+        private Task<TestObject> QueryAsyncWith2Paramters(IDbConnection c, int a, int b)
+        {
+            Assert.IsNotNull(c);
+            return Task.FromResult(new TestObject(a + b, "Baaary"));
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿namespace Rrs.Data
+﻿using System;
+using System.Data;
+using System.Threading.Tasks;
+
+namespace Rrs.Data
 {
-    public interface IDbDelegator : IDbNonTransactionalDelegator, IDbTransactionalDelegator
-    {
-        IDelegatorBus DelegatorBus { get; set; }
-    }
+
 }
