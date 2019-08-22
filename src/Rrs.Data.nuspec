@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
     <metadata>
-        <id>Package</id>
+        <id>Rrs.Data</id>
         <version>1.0.0</version>
         <authors>Robert Snipe</authors>
         <owners>Robert Snipe</owners>
