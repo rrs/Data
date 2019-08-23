@@ -13,6 +13,6 @@
     </metadata>
     <files>
         <file src="..\Rrs.Data.Net40\bin\Release\net40\**" target="lib\net40\Rrs.Data.dll" />
-        <file src="..\Rrs.Data\bin\Release\netstandard2.0\**" target="lib\netstandard20\Rrs.Data.dll" />
+        <file src="bin\Release\netstandard2.0\**" target="lib\netstandard20\Rrs.Data.dll" />
     </files>
 </package>
