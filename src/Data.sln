@@ -9,13 +9,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\README.md = ..\README.md
+		Rrs.Data.nuspec = Rrs.Data.nuspec
 	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Rrs.Data.Shared", "Rrs.Data.Shared\Rrs.Data.Shared.shproj", "{DD0CDD1C-88A7-4988-8D7A-45F281988512}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rrs.Data.Net40", "Rrs.Data.Net40\Rrs.Data.Net40.csproj", "{6A4DB683-3551-4E92-8444-6C9C8C031B64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rrs.Data", "Rrs.Data\Rrs.Data.csproj", "{CD9A9CD5-194F-48E3-86D7-67285E7A8CC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rrs.Data", "Rrs.Data\Rrs.Data.csproj", "{CD9A9CD5-194F-48E3-86D7-67285E7A8CC3}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
