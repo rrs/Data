@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>Rrs.Data</id>
-        <version>1.1.1</version>
+        <version>1.1.2</version>
         <authors>Robert Snipe</authors>
         <owners>Robert Snipe</owners>
         <projectUrl>https://github.com/rrs/Data</projectUrl>
@@ -12,8 +12,8 @@
         <tags>Rrs Data Net40 Net452 Standard20</tags>
     </metadata>
     <files>
-        <file src=".\Rrs.Data.Net40\bin\Release\net40\**" target="lib\net40\Rrs.Data.dll" />
-        <file src=".\Rrs.Data\bin\Release\net452\**" target="lib\net452\Rrs.Data.dll" />
-        <file src=".\Rrs.Data\bin\Release\netstandard2.0\**" target="lib\netstandard20\Rrs.Data.dll" />
+        <file src=".\Rrs.Data.Net40\bin\Release\net40\**" target="lib\net40\" />
+        <file src=".\Rrs.Data\bin\Release\net452\**" target="lib\net45\" />
+        <file src=".\Rrs.Data\bin\Release\netstandard2.0\**" target="lib\netstandard20\" />
     </files>
 </package>

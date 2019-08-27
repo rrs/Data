@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net40</TargetFramework>
+    <AssemblyName>Rrs.Data</AssemblyName>
+    <RootNamespace>Rrs.Data</RootNamespace>
   </PropertyGroup>
   <Import Project="..\Rrs.Data.Shared\Rrs.Data.Shared.projitems" Label="Shared" />
 </Project>
