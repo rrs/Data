@@ -1,9 +1,10 @@
 ﻿using System.Data;
+using System.Threading.Tasks;
 
 namespace Rrs.Data
 {
     public partial interface IDbConnectionFactory
     {
-        IDbConnection OpenConnection();
+        Task<IDbConnection> OpenConnectionAsync();
     }
 }

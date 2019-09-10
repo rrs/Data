@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>Rrs.Data</id>
-        <version>1.1.2</version>
+        <version>1.0.0</version>
         <authors>Robert Snipe</authors>
         <owners>Robert Snipe</owners>
         <projectUrl>https://github.com/rrs/Data</projectUrl>
@@ -10,6 +10,14 @@
         <description>Rrs.Data Class Library</description>
         <copyright>Copyright (c) 2018 Robert Snipe</copyright>
         <tags>Rrs Data Net40 Net45 Standard20</tags>
+        <dependencies>
+          <group targetFramework=".NETFramework4.0">
+          </group>
+          <group targetFramework=".NETFramework4.5">
+          </group>
+          <group targetFramework=".NETStandard2.0">
+          </group>
+        </dependencies>
     </metadata>
     <files>
         <file src=".\Rrs.Data.Net40\bin\Release\net40\**" target="lib\net40\" />
