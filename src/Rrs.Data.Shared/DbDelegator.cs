@@ -5,18 +5,17 @@ namespace Rrs.Data
 {
     public partial class DbDelegator : IDbDelegator
     {
-        private readonly IDbConnectionFactory _connectionFactory;
+        public IDbConnectionFactory ConnectionFactory { get; }
         public IDelegatorBus DelegatorBus { get; set; }
-
         public DbDelegator(IDbConnectionFactory connectionFactory, IDelegatorBus delegatorBus = null)
         {
-            _connectionFactory = connectionFactory;
+            ConnectionFactory = connectionFactory;
             DelegatorBus = delegatorBus ?? new DefaultDelegatorBus();
         }
 
         public void Execute(Action<IDbConnection> command)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             {
                 DelegatorBus.Execute(() => command(c), command.Method);
             }
@@ -24,7 +23,7 @@ namespace Rrs.Data
 
         public void Execute(Action<IDbTransaction> command, IsolationLevel isolationLevel)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
@@ -41,7 +40,7 @@ namespace Rrs.Data
 
         public void Execute<T>(Action<IDbConnection, T> command, T parameter)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             {
                 DelegatorBus.Execute(p => command.Invoke(c, p), parameter, command.Method);
             }
@@ -49,7 +48,7 @@ namespace Rrs.Data
 
         public void Execute<T>(Action<IDbTransaction, T> command, T parameter, IsolationLevel isolationLevel)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
@@ -66,7 +65,7 @@ namespace Rrs.Data
 
         public T Execute<T>(Func<IDbConnection, T> query)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             {
                 return DelegatorBus.Execute(() => query.Invoke(c), query.Method);
             }
@@ -74,7 +73,7 @@ namespace Rrs.Data
 
         public T Execute<T>(Func<IDbTransaction, T> query, IsolationLevel isolationLevel)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
@@ -92,7 +91,7 @@ namespace Rrs.Data
 
         public TOut Execute<TIn, TOut>(Func<IDbConnection, TIn, TOut> query, TIn parameter)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             {
                 return DelegatorBus.Execute(p => query.Invoke(c, p), parameter, query.Method);
             }
@@ -100,7 +99,7 @@ namespace Rrs.Data
 
         public TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter, IsolationLevel isolationLevel)
         {
-            using (var c = _connectionFactory.OpenConnection())
+            using (var c = ConnectionFactory.OpenConnection())
             using (var t = c.BeginTransaction())
             {
                 try
