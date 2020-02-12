@@ -31,9 +31,10 @@ namespace Rrs.Data
                     DelegatorBus.Execute(() => command.Invoke(t), command.Method);
                     t.Commit();
                 }
-                finally
+                catch
                 {
                     t.Rollback();
+                    throw;
                 }
             }
         }
@@ -56,9 +57,10 @@ namespace Rrs.Data
                     DelegatorBus.Execute(p => command.Invoke(t, p), parameter, command.Method);
                     t.Commit();
                 }
-                finally
+                catch
                 {
                     t.Rollback();
+                    throw;
                 }
             }
         }
@@ -82,9 +84,10 @@ namespace Rrs.Data
                     t.Commit();
                     return r;
                 }
-                finally
+                catch
                 {
                     t.Rollback();
+                    throw;
                 }
             }
         }
@@ -108,9 +111,10 @@ namespace Rrs.Data
                     t.Commit();
                     return r;
                 }
-                finally
+                catch
                 {
                     t.Rollback();
+                    throw;
                 }
             }
         }

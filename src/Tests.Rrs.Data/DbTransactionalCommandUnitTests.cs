@@ -1,3 +1,4 @@
+using Moq;
 using NUnit.Framework;
 using Rrs.Data;
 using System;
@@ -22,6 +23,7 @@ namespace Tests.Rrs.Data
         {
             _q.Execute(Command);
             _f.MockDbTransaction.Verify(o => o.Commit());
+            _f.MockDbTransaction.Verify(o => o.Rollback(), Times.Never);
         }
 
         private static void Command(IDbTransaction t)
@@ -34,6 +36,7 @@ namespace Tests.Rrs.Data
         {
             Assert.Throws<Exception>(() => _q.Execute(ExceptionCommand));
             _f.MockDbTransaction.Verify(o => o.Rollback());
+            _f.MockDbTransaction.Verify(o => o.Commit(), Times.Never);
         }
 
         private static void ExceptionCommand(IDbTransaction t)
