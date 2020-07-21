@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rrs.Data", "Rrs.Data\Rrs.Da
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Rrs.Data.Shared\Rrs.Data.Shared.projitems*{6a4db683-3551-4e92-8444-6c9c8c031b64}*SharedItemsImports = 5
+		Rrs.Data.Shared\Rrs.Data.Shared.projitems*{cd9a9cd5-194f-48e3-86d7-67285e7a8cc3}*SharedItemsImports = 5
 		Rrs.Data.Shared\Rrs.Data.Shared.projitems*{dd0cdd1c-88a7-4988-8d7a-45f281988512}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
