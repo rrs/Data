@@ -9,7 +9,7 @@ namespace Rrs.Data
         void Execute<T>(Action<IDbTransaction, T> command, T parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
         T Execute<T>(Func<IDbTransaction, T> query, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
         TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
-        void Execute(Action<IDbConnection> action, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
-        T Execute<T>(Func<IDbConnection, T> func, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        void ExecuteInTransaction(Action<IDbConnection> action, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+        T ExecuteInTransaction<T>(Func<IDbConnection, T> func, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
     }
 }

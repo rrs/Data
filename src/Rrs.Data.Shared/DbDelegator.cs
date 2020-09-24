@@ -119,8 +119,8 @@ namespace Rrs.Data
             }
         }
 
-        public void Execute(Action<IDbConnection> action, IsolationLevel isolationLevel) => Execute(t => action(t.Connection), isolationLevel);
+        public void ExecuteInTransaction(Action<IDbConnection> action, IsolationLevel isolationLevel) => Execute(t => action(t.Connection), isolationLevel);
 
-        public T Execute<T>(Func<IDbConnection, T> func, IsolationLevel isolationLevel) => Execute(t => func(t.Connection), isolationLevel);
+        public T ExecuteInTransaction<T>(Func<IDbConnection, T> func, IsolationLevel isolationLevel) => Execute(t => func(t.Connection), isolationLevel);
     }
 }

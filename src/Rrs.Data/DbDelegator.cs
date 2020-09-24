@@ -112,8 +112,8 @@ namespace Rrs.Data
             }
         }
 
-        public Task Execute(Func<IDbConnection, Task> func, IsolationLevel isolationLevel) => ExecuteAsync(t => func(t.Connection), isolationLevel);
+        public Task ExecuteInTransaction(Func<IDbConnection, Task> func, IsolationLevel isolationLevel) => ExecuteAsync(t => func(t.Connection), isolationLevel);
 
-        public Task<T> Execute<T>(Func<IDbConnection, Task<T>> func, IsolationLevel isolationLevel) => ExecuteAsync(t => func(t.Connection), isolationLevel);
+        public Task<T> ExecuteInTransaction<T>(Func<IDbConnection, Task<T>> func, IsolationLevel isolationLevel) => ExecuteAsync(t => func(t.Connection), isolationLevel);
     }
 }
