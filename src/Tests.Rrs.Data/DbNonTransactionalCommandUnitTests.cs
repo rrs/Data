@@ -24,7 +24,7 @@ namespace Tests.Rrs.Data
         }
 
         [Test]
-        public void CommandAsyncGetsAConnection() => _q.ExecuteAsync(CommandAsync);
+        public void CommandAsyncGetsAConnection() => _q.Execute(CommandAsync);
 
         private static Task CommandAsync(IDbConnection c)
         {
@@ -43,7 +43,7 @@ namespace Tests.Rrs.Data
         }
 
         [Test]
-        public void TestCommandAsyncWithABasicParameter() => _q.ExecuteAsync(CommandAsync, 5);
+        public void TestCommandAsyncWithABasicParameter() => _q.Execute(CommandAsync, 5);
 
         private static Task CommandAsync(IDbConnection c, int p)
         {
@@ -64,7 +64,7 @@ namespace Tests.Rrs.Data
         }
 
         [Test]
-        public void TestCommandAsyncWithAnObjectParameter() => _q.ExecuteAsync(CommandAsync, new TestObject(67, "Barry"));
+        public void TestCommandAsyncWithAnObjectParameter() => _q.Execute(CommandAsync, new TestObject(67, "Barry"));
 
         private static Task CommandAsync(IDbConnection c, TestObject p)
         {

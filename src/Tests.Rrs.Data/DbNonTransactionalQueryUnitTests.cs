@@ -30,7 +30,7 @@ namespace Tests.Rrs.Data
 
         public void QueryAsyncGetsABasicValue()
         {
-            var r = _q.ExecuteAsync(QueryAsync).Result;
+            var r = _q.Execute(QueryAsync).Result;
             Assert.AreEqual("Moooo!", r);
         }
 
@@ -57,7 +57,7 @@ namespace Tests.Rrs.Data
         [Test]
         public void QueryAsyncGetsAnObject()
         {
-            var r = _q.ExecuteAsync(QueryAsyncReturnsAnObject).Result;
+            var r = _q.Execute(QueryAsyncReturnsAnObject).Result;
             Assert.AreEqual(2, r.Id);
             Assert.AreEqual("Wilbur", r.Name);
         }
@@ -84,7 +84,7 @@ namespace Tests.Rrs.Data
         [Test]
         public void QueryAsyncGetsABasicValueFromABasicValue()
         {
-            var r = _q.ExecuteAsync(QueryAsync, 717).Result;
+            var r = _q.Execute(QueryAsync, 717).Result;
             Assert.AreEqual(717, r);
         }
 
@@ -111,7 +111,7 @@ namespace Tests.Rrs.Data
         [Test]
         public void QueryAsyncGetsAnObjectFromABasicValue()
         {
-            var r = _q.ExecuteAsync(QueryAsyncReturnsAnObject, 909).Result;
+            var r = _q.Execute(QueryAsyncReturnsAnObject, 909).Result;
             Assert.AreEqual(909, r.Id);
             Assert.AreEqual("Gaaary", r.Name);
         }
@@ -139,7 +139,7 @@ namespace Tests.Rrs.Data
         [Test]
         public void QueryAsyncAccepts2Parameters()
         {
-            var r = _q.ExecuteAsync(QueryAsyncWith2Paramters, 1, 2).Result;
+            var r = _q.Execute(QueryAsyncWith2Paramters, 1, 2).Result;
             Assert.AreEqual(3, r.Id);
             Assert.AreEqual("Baaary", r.Name);
         }

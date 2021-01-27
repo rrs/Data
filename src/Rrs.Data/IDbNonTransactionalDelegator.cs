@@ -8,9 +8,9 @@ namespace Rrs.Data
 {
     public partial interface IDbNonTransactionalDelegator
     {
-        Task ExecuteAsync(Func<IDbConnection, Task> command);
-        Task ExecuteAsync<T>(Func<IDbConnection, T, Task> command, T parameter);
-        Task<T> ExecuteAsync<T>(Func<IDbConnection, Task<T>> query);
-        Task<TOut> ExecuteAsync<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter);
+        Task Execute(Func<IDbConnection, Task> command);
+        Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter);
+        Task<T> Execute<T>(Func<IDbConnection, Task<T>> query);
+        Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter);
     }
 }
