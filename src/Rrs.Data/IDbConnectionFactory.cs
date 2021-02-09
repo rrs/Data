@@ -3,8 +3,11 @@ using System.Threading.Tasks;
 
 namespace Rrs.Data
 {
-    public partial interface IDbConnectionFactory
+    public interface IDbConnectionFactory
     {
+        IDbConnection NewConnection();
+        IDbConnection OpenConnection();
+        IConnectionProperties ConnectionProperties { get; }
         Task<IDbConnection> OpenConnectionAsync();
     }
 }
