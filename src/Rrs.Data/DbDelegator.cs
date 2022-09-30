@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.Data
@@ -7,18 +8,16 @@ namespace Rrs.Data
     public class DbDelegator : IDbDelegator
     {
         public IDbConnectionFactory ConnectionFactory { get; }
-        public IDelegatorBus DelegatorBus { get; set; }
-        public DbDelegator(IDbConnectionFactory connectionFactory, IDelegatorBus delegatorBus = null)
+        public DbDelegator(IDbConnectionFactory connectionFactory)
         {
             ConnectionFactory = connectionFactory;
-            DelegatorBus = delegatorBus ?? new DefaultDelegatorBus();
         }
 
         public void Execute(Action<IDbConnection> command)
         {
             using (var c = ConnectionFactory.OpenConnection())
             {
-                DelegatorBus.Execute(() => command(c), command.Method);
+                command(c);
             }
         }
 
@@ -29,7 +28,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    DelegatorBus.Execute(() => command.Invoke(t), command.Method);
+                    command.Invoke(t);
                     t.Commit();
                 }
                 catch
@@ -44,7 +43,7 @@ namespace Rrs.Data
         {
             using (var c = ConnectionFactory.OpenConnection())
             {
-                DelegatorBus.Execute(p => command.Invoke(c, p), parameter, command.Method);
+                command.Invoke(c, parameter);
             }
         }
 
@@ -55,7 +54,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    DelegatorBus.Execute(p => command.Invoke(t, p), parameter, command.Method);
+                    command.Invoke(t, parameter);
                     t.Commit();
                 }
                 catch
@@ -70,7 +69,7 @@ namespace Rrs.Data
         {
             using (var c = ConnectionFactory.OpenConnection())
             {
-                return DelegatorBus.Execute(() => query.Invoke(c), query.Method);
+                return query.Invoke(c);
             }
         }
 
@@ -81,7 +80,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    var r = DelegatorBus.Execute(() => query.Invoke(t), query.Method);
+                    var r = query.Invoke(t);
                     t.Commit();
                     return r;
                 }
@@ -97,7 +96,7 @@ namespace Rrs.Data
         {
             using (var c = ConnectionFactory.OpenConnection())
             {
-                return DelegatorBus.Execute(p => query.Invoke(c, p), parameter, query.Method);
+                return query.Invoke(c, parameter);
             }
         }
 
@@ -108,7 +107,7 @@ namespace Rrs.Data
             {
                 try
                 {
-                    var r = DelegatorBus.Execute(p => query.Invoke(t, p), parameter, query.Method);
+                    var r = query.Invoke(t, parameter);
                     t.Commit();
                     return r;
                 }
@@ -120,22 +119,22 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute(Func<IDbConnection, Task> command)
+        public async Task Execute(Func<IDbConnection, Task> command, CancellationToken cancellationToken = default)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
-                await DelegatorBus.Execute(() => command(c), command.Method);
+                await command(c);
             }
         }
 
-        public async Task Execute(Func<IDbTransaction, Task> command, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task Execute(Func<IDbTransaction, Task> command, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    await DelegatorBus.Execute(() => command.Invoke(t), command.Method);
+                    await command.Invoke(t);
                     t.Commit();
                 }
                 catch
@@ -146,22 +145,22 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter)
+        public async Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter, CancellationToken cancellationToken = default)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
-                await DelegatorBus.Execute(p => command.Invoke(c, p), parameter, command.Method);
+                await command.Invoke(c, parameter);
             }
         }
 
-        public async Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    await DelegatorBus.Execute(p => command.Invoke(t, p), parameter, command.Method);
+                    await command.Invoke(t, parameter);
                     t.Commit();
                 }
                 catch
@@ -172,49 +171,22 @@ namespace Rrs.Data
             }
         }
 
-        public async Task<T> Execute<T>(Func<IDbConnection, Task<T>> query)
+        public async Task<T> Execute<T>(Func<IDbConnection, Task<T>> query, CancellationToken cancellationToken = default)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
-                return await DelegatorBus.Execute(() => query.Invoke(c), query.Method);
+                return await query.Invoke(c);
             }
         }
 
-        public async Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             using (var t = c.BeginTransaction())
             {
                 try
                 {
-                    var r = await DelegatorBus.Execute(() => query.Invoke(t), query.Method);
-                    t.Commit();
-                    return r;
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
-            }
-        }
-
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter)
-        {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
-            {
-                return await DelegatorBus.Execute(p => query.Invoke(c, p), parameter, query.Method);
-            }
-        }
-
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            using (var c = await ConnectionFactory.OpenConnectionAsync())
-            using (var t = c.BeginTransaction())
-            {
-                try
-                {
-                    var r = await DelegatorBus.Execute(p => query.Invoke(t, p), parameter, query.Method);
+                    var r = await query.Invoke(t);
                     t.Commit();
                     return r;
                 }
@@ -226,26 +198,39 @@ namespace Rrs.Data
             }
         }
 
-        public Task ExecuteInTransaction(Func<IDbTransaction, Task> func, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), isolationLevel);
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken = default)
+        {
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
+            {
+                return await query.Invoke(c, parameter);
+            }
+        }
 
-        public Task<T> ExecuteInTransaction<T>(Func<IDbTransaction, Task<T>> func, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), isolationLevel);
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
+            using (var t = c.BeginTransaction())
+            {
+                try
+                {
+                    var r = await query.Invoke(t, parameter);
+                    t.Commit();
+                    return r;
+                }
+                catch
+                {
+                    t.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        public Task ExecuteInTransaction(Func<IDbTransaction, Task> func, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), cancellationToken, isolationLevel);
+
+        public Task<T> ExecuteInTransaction<T>(Func<IDbTransaction, Task<T>> func, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), cancellationToken, isolationLevel);
 
         public void ExecuteInTransaction(Action<IDbTransaction> action, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => action(t), isolationLevel);
 
         public T ExecuteInTransaction<T>(Func<IDbTransaction, T> func, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), isolationLevel);
-
-        public DbDelegatorTransaction BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            var c = ConnectionFactory.OpenConnection();
-            var t = c.BeginTransaction();
-            return new DbDelegatorTransaction(c, t, DelegatorBus);
-        }
-
-        public async Task<DbDelegatorTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            var c = await ConnectionFactory.OpenConnectionAsync();
-            var t = c.BeginTransaction();
-            return new DbDelegatorTransaction(c, t, DelegatorBus);
-        }
     }
 }

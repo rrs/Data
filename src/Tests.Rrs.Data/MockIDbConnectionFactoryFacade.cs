@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Rrs.Data;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tests.Rrs.Data
@@ -26,7 +27,7 @@ namespace Tests.Rrs.Data
             dbcMock.Setup(o => o.BeginTransaction()).Returns(dbtMock.Object);
             var dbcFactoryMock = new Mock<IDbConnectionFactory>();
             dbcFactoryMock.Setup(o => o.OpenConnection()).Returns(dbcMock.Object);
-            dbcFactoryMock.Setup(o => o.OpenConnectionAsync()).Returns(Task.FromResult(dbcMock.Object));
+            dbcFactoryMock.Setup(o => o.OpenConnectionAsync(CancellationToken.None)).Returns(Task.FromResult(dbcMock.Object));
             return new MockIDbConnectionFactoryFacade(dbcMock, dbtMock, dbcFactoryMock);
         }
     }
