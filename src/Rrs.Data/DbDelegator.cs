@@ -127,6 +127,14 @@ namespace Rrs.Data
             }
         }
 
+        public async Task Execute(Func<IDbConnection, CancellationToken, Task> command, CancellationToken cancellationToken = default)
+        {
+            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
+            {
+                await command(c, cancellationToken);
+            }
+        }
+
         public async Task Execute(Func<IDbTransaction, Task> command, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))

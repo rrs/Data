@@ -1,12 +1,14 @@
 using NUnit.Framework;
 using Rrs.Data;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tests.Rrs.Data
 {
     public class DbNonTransactionalCommandUnitTests
     {
+        private CancellationTokenSource _cts = new CancellationTokenSource();
         private IDbDelegator _q;
 
         [SetUp]
@@ -72,6 +74,17 @@ namespace Tests.Rrs.Data
             Assert.AreEqual(67, p.Id);
             Assert.AreEqual("Barry", p.Name);
 
+            return Task.CompletedTask;
+        }
+
+        [Test]
+        public void TestCommandAsyncAccepts2ParametersAndCancellationToken() => _q.Execute(CommandAsyncWith2ParamtersAndCancellationToken, 5, 2, _cts.Token);
+
+        private Task CommandAsyncWith2ParamtersAndCancellationToken(IDbConnection c, int a, int b, CancellationToken cancellationToken)
+        {
+            Assert.AreEqual(5, a);
+            Assert.AreEqual(2, b);
+            Assert.AreEqual(_cts.Token, cancellationToken);
             return Task.CompletedTask;
         }
     }

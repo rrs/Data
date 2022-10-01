@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using Rrs.Data;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tests.Rrs.Data
@@ -148,6 +149,20 @@ namespace Tests.Rrs.Data
         {
             Assert.IsNotNull(c);
             return Task.FromResult(new TestObject(a + b, "Baaary"));
+        }
+
+        [Test]
+        public void QueryAsyncAccepts2ParametersAndCancellationToken()
+        {
+            var r = _q.Execute(QueryAsyncWith2ParamtersAndCancellationToken, 5, 2, CancellationToken.None).Result;
+            Assert.AreEqual(7, r.Id);
+            Assert.AreEqual("Boris", r.Name);
+        }
+
+        private Task<TestObject> QueryAsyncWith2ParamtersAndCancellationToken(IDbConnection c, int a, int b, CancellationToken cancellationToken = default)
+        {
+            Assert.IsNotNull(c);
+            return Task.FromResult(new TestObject(a + b, "Boris"));
         }
     }
 }
