@@ -119,7 +119,9 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute(Func<IDbConnection, Task> command, CancellationToken cancellationToken = default)
+        public Task Execute(Func<IDbConnection, Task> command) => Execute(command, CancellationToken.None);
+
+        public async Task Execute(Func<IDbConnection, Task> command, CancellationToken cancellationToken)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
@@ -127,7 +129,9 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute(Func<IDbConnection, CancellationToken, Task> command, CancellationToken cancellationToken = default)
+        public Task Execute(Func<IDbConnection, CancellationToken, Task> command) => Execute(command, CancellationToken.None);
+
+        public async Task Execute(Func<IDbConnection, CancellationToken, Task> command, CancellationToken cancellationToken)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
@@ -135,7 +139,9 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute(Func<IDbTransaction, Task> command, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public Task Execute(Func<IDbTransaction, Task> command, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(command, CancellationToken.None, isolationLevel);
+
+        public async Task Execute(Func<IDbTransaction, Task> command, CancellationToken cancellationToken, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             using (var t = c.BeginTransaction())
@@ -153,7 +159,9 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter, CancellationToken cancellationToken = default)
+        public Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter) => Execute(command, parameter, CancellationToken.None);
+
+        public async Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter, CancellationToken cancellationToken)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
@@ -161,7 +169,9 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(command, parameter, isolationLevel);
+
+        public async Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter, CancellationToken cancellationToken, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             using (var t = c.BeginTransaction())
@@ -179,13 +189,17 @@ namespace Rrs.Data
             }
         }
 
-        public async Task<T> Execute<T>(Func<IDbConnection, Task<T>> query, CancellationToken cancellationToken = default)
+        public Task<T> Execute<T>(Func<IDbConnection, Task<T>> query) => Execute(query);
+
+        public async Task<T> Execute<T>(Func<IDbConnection, Task<T>> query, CancellationToken cancellationToken)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
                 return await query.Invoke(c);
             }
         }
+
+        public Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(query, isolationLevel);
 
         public async Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -206,7 +220,9 @@ namespace Rrs.Data
             }
         }
 
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken = default)
+        public Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter) => Execute(query, parameter, CancellationToken.None);
+
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             {
@@ -214,7 +230,9 @@ namespace Rrs.Data
             }
         }
 
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(query, parameter, CancellationToken.None,  isolationLevel);    
+
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
             using (var t = c.BeginTransaction())
