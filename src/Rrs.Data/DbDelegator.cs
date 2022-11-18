@@ -7,256 +7,298 @@ namespace Rrs.Data
 {
     public class DbDelegator : IDbDelegator
     {
+        private readonly IsolationLevel _isolationLevel = IsolationLevel.ReadCommitted;
+        private readonly CancellationToken _cancellationToken = CancellationToken.None;
+
         public IDbConnectionFactory ConnectionFactory { get; }
+        
         public DbDelegator(IDbConnectionFactory connectionFactory)
         {
             ConnectionFactory = connectionFactory;
         }
 
-        public void Execute(Action<IDbConnection> command)
+        protected DbDelegator(IDbConnectionFactory connectionFactory, IsolationLevel isolationLevel, CancellationToken cancellationToken) : this(connectionFactory)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            {
-                command(c);
-            }
+            _isolationLevel = isolationLevel;
+            _cancellationToken = cancellationToken;
         }
 
-        public void Execute(Action<IDbTransaction> command, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public IDbDelegator WithCancellationToken(CancellationToken cancellationToken) => new DbDelegator(ConnectionFactory, _isolationLevel, cancellationToken);
+        public IDbDelegator WithIsolationLevel(IsolationLevel isolationLevel) => new DbDelegator(ConnectionFactory, isolationLevel, _cancellationToken);
+
+        public void Execute(Action<IDbConnection> command)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            using (var t = c.BeginTransaction())
+            using var c = ConnectionFactory.OpenConnection();
+            command(c);
+        }
+
+        public void Execute(Action<IDbTransaction> command)
+        {
+            using var c = ConnectionFactory.OpenConnection();
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
             {
-                try
-                {
-                    command.Invoke(t);
-                    t.Commit();
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
+                command.Invoke(t);
+                t.Commit();
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
         public void Execute<T>(Action<IDbConnection, T> command, T parameter)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            {
-                command.Invoke(c, parameter);
-            }
+            using var c = ConnectionFactory.OpenConnection();
+            command.Invoke(c, parameter);
         }
 
-        public void Execute<T>(Action<IDbTransaction, T> command, T parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public void Execute<T>(Action<IDbTransaction, T> command, T parameter)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            using (var t = c.BeginTransaction())
+            using var c = ConnectionFactory.OpenConnection();
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
             {
-                try
-                {
-                    command.Invoke(t, parameter);
-                    t.Commit();
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
+                command.Invoke(t, parameter);
+                t.Commit();
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
         public T Execute<T>(Func<IDbConnection, T> query)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            {
-                return query.Invoke(c);
-            }
+            using var c = ConnectionFactory.OpenConnection();
+            return query.Invoke(c);
         }
 
-        public T Execute<T>(Func<IDbTransaction, T> query, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public T Execute<T>(Func<IDbTransaction, T> query)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            using (var t = c.BeginTransaction())
+            using var c = ConnectionFactory.OpenConnection();
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
             {
-                try
-                {
-                    var r = query.Invoke(t);
-                    t.Commit();
-                    return r;
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
+                var r = query.Invoke(t);
+                t.Commit();
+                return r;
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
         public TOut Execute<TIn, TOut>(Func<IDbConnection, TIn, TOut> query, TIn parameter)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            {
-                return query.Invoke(c, parameter);
-            }
+            using var c = ConnectionFactory.OpenConnection();
+            return query.Invoke(c, parameter);
         }
 
-        public TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter)
         {
-            using (var c = ConnectionFactory.OpenConnection())
-            using (var t = c.BeginTransaction())
+            using var c = ConnectionFactory.OpenConnection();
+            using var t = c.BeginTransaction(_isolationLevel);
+            
+            try
             {
-                try
-                {
-                    var r = query.Invoke(t, parameter);
-                    t.Commit();
-                    return r;
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
+                var r = query.Invoke(t, parameter);
+                t.Commit();
+                return r;
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
-        public Task Execute(Func<IDbConnection, Task> command) => Execute(command, CancellationToken.None);
-
-        public async Task Execute(Func<IDbConnection, Task> command, CancellationToken cancellationToken)
+        public async Task Execute(Func<IDbConnection, Task> command)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
-            {
-                await command(c);
-            }
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            
+            await command(c);
         }
 
-        public Task Execute(Func<IDbConnection, CancellationToken, Task> command) => Execute(command, CancellationToken.None);
-
-        public async Task Execute(Func<IDbConnection, CancellationToken, Task> command, CancellationToken cancellationToken)
+        public async Task Execute(Func<IDbConnection, CancellationToken, Task> command)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
-            {
-                await command(c, cancellationToken);
-            }
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            
+            await command(c, _cancellationToken);
         }
 
-        public Task Execute(Func<IDbTransaction, Task> command, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(command, CancellationToken.None, isolationLevel);
-
-        public async Task Execute(Func<IDbTransaction, Task> command, CancellationToken cancellationToken, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task Execute(Func<IDbTransaction, Task> command)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
-            using (var t = c.BeginTransaction())
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            using var t = c.BeginTransaction(_isolationLevel);
+
+            try
             {
-                try
-                {
-                    await command.Invoke(t);
-                    t.Commit();
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
+                await command.Invoke(t);
+                t.Commit();
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
-        public Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter) => Execute(command, parameter, CancellationToken.None);
-
-        public async Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter, CancellationToken cancellationToken)
+        public async Task Execute(Func<IDbTransaction, CancellationToken, Task> command)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            using var t = c.BeginTransaction(_isolationLevel);
+            
+            try
             {
-                await command.Invoke(c, parameter);
+                await command.Invoke(t, _cancellationToken);
+                t.Commit();
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
-        public Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(command, parameter, isolationLevel);
-
-        public async Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter, CancellationToken cancellationToken, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
-            using (var t = c.BeginTransaction())
-            {
-                try
-                {
-                    await command.Invoke(t, parameter);
-                    t.Commit();
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
-            }
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            await command.Invoke(c, parameter);
         }
 
-        public Task<T> Execute<T>(Func<IDbConnection, Task<T>> query) => Execute(query);
-
-        public async Task<T> Execute<T>(Func<IDbConnection, Task<T>> query, CancellationToken cancellationToken)
+        public async Task Execute<T>(Func<IDbConnection, T, CancellationToken, Task> command, T parameter)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
-            {
-                return await query.Invoke(c);
-            }
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            await command.Invoke(c, parameter, _cancellationToken);
         }
 
-        public Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(query, isolationLevel);
-
-        public async Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
-            using (var t = c.BeginTransaction())
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
             {
-                try
-                {
-                    var r = await query.Invoke(t);
-                    t.Commit();
-                    return r;
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
+                await command.Invoke(t, parameter);
+                t.Commit();
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
-        public Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter) => Execute(query, parameter, CancellationToken.None);
-
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken)
+        public async Task Execute<T>(Func<IDbTransaction, T, CancellationToken, Task> command, T parameter)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
             {
-                return await query.Invoke(c, parameter);
+                await command.Invoke(t, parameter, _cancellationToken);
+                t.Commit();
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
-        public Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(query, parameter, CancellationToken.None,  isolationLevel);    
-
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter, CancellationToken cancellationToken, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public async Task<T> Execute<T>(Func<IDbConnection, Task<T>> query)
         {
-            using (var c = await ConnectionFactory.OpenConnectionAsync(cancellationToken))
-            using (var t = c.BeginTransaction())
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            return await query.Invoke(c);
+        }
+
+        public async Task<T> Execute<T>(Func<IDbConnection, CancellationToken, Task<T>> query)
+        {
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            return await query.Invoke(c, _cancellationToken);
+        }
+
+        public async Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query)
+        {
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
             {
-                try
-                {
-                    var r = await query.Invoke(t, parameter);
-                    t.Commit();
-                    return r;
-                }
-                catch
-                {
-                    t.Rollback();
-                    throw;
-                }
+                var r = await query.Invoke(t);
+                t.Commit();
+                return r;
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
             }
         }
 
-        public Task ExecuteInTransaction(Func<IDbTransaction, Task> func, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), cancellationToken, isolationLevel);
+        public async Task<T> Execute<T>(Func<IDbTransaction, CancellationToken, Task<T>> query)
+        {
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
+            {
+                var r = await query.Invoke(t, _cancellationToken);
+                t.Commit();
+                return r;
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
+            }
+        }
 
-        public Task<T> ExecuteInTransaction<T>(Func<IDbTransaction, Task<T>> func, CancellationToken cancellationToken = default, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), cancellationToken, isolationLevel);
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter)
+        {
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            return await query.Invoke(c, parameter);
+        }
 
-        public void ExecuteInTransaction(Action<IDbTransaction> action, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => action(t), isolationLevel);
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, CancellationToken, Task<TOut>> query, TIn parameter)
+        {
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            return await query.Invoke(c, parameter, _cancellationToken);
+        }
 
-        public T ExecuteInTransaction<T>(Func<IDbTransaction, T> func, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) => Execute(t => func(t), isolationLevel);
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter)
+        {
+            using var c = await ConnectionFactory.OpenConnectionAsync();
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
+            {
+                var r = await query.Invoke(t, parameter);
+                t.Commit();
+                return r;
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
+            }
+        }
+
+        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, CancellationToken, Task<TOut>> query, TIn parameter)
+        {
+            using var c = await ConnectionFactory.OpenConnectionAsync(_cancellationToken);
+            using var t = c.BeginTransaction(_isolationLevel);
+            try
+            {
+                var r = await query.Invoke(t, parameter, _cancellationToken);
+                t.Commit();
+                return r;
+            }
+            catch
+            {
+                t.Rollback();
+                throw;
+            }
+        }
     }
 }
