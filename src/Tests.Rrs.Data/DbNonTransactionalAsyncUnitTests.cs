@@ -8,7 +8,7 @@ namespace Tests.Rrs.Data
 {
     public class DbNonTransactionalAsyncUnitTests
     {
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource _cts =new CancellationTokenSource();
         private IDbDelegator _q;
 
         [SetUp]
@@ -100,7 +100,7 @@ namespace Tests.Rrs.Data
         [Test]
         public Task TestCommandAsyncAccepts2ParametersAndCancellationToken()
         {
-            return _q.Execute(Command, 5, 2);
+            return _q.WithCancellationToken(_cts.Token).Execute(Command, 5, 2);
         
             Task Command(IDbConnection c, int a, int b, CancellationToken cancellationToken)
             {
@@ -128,7 +128,7 @@ namespace Tests.Rrs.Data
         [Test]
         public async Task QueryAsyncGetsABasicValueWithCancellationToken()
         {
-            var r = await _q.Execute(Query);
+            var r = await _q.WithCancellationToken(_cts.Token).Execute(Query);
             Assert.AreEqual("Moooo!", r);
 
             Task<string> Query(IDbConnection c, CancellationToken cancellationToken)

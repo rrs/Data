@@ -24,10 +24,10 @@ namespace Tests.Rrs.Data
             var dbtMock = new Mock<IDbTransaction>();
 
             var dbcMock = new Mock<IDbConnection>();
-            dbcMock.Setup(o => o.BeginTransaction()).Returns(dbtMock.Object);
+            dbcMock.Setup(o => o.BeginTransaction(It.IsAny<IsolationLevel>())).Returns(dbtMock.Object);
             var dbcFactoryMock = new Mock<IDbConnectionFactory>();
             dbcFactoryMock.Setup(o => o.OpenConnection()).Returns(dbcMock.Object);
-            dbcFactoryMock.Setup(o => o.OpenConnectionAsync(CancellationToken.None)).Returns(Task.FromResult(dbcMock.Object));
+            dbcFactoryMock.Setup(o => o.OpenConnectionAsync(It.IsAny<CancellationToken>())).Returns(Task.FromResult(dbcMock.Object));
             return new MockIDbConnectionFactoryFacade(dbcMock, dbtMock, dbcFactoryMock);
         }
     }
