@@ -117,12 +117,7 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute(Func<IDbConnection, Task> command)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            
-            await command(c);
-        }
+        public Task Execute(Func<IDbConnection, Task> command) => Execute((c, t) => command(c));
 
         public async Task Execute(Func<IDbConnection, CancellationToken, Task> command)
         {
@@ -131,22 +126,7 @@ namespace Rrs.Data
             await command(c, _cancellationToken);
         }
 
-        public async Task Execute(Func<IDbTransaction, Task> command)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            using var t = c.BeginTransaction(_isolationLevel);
-
-            try
-            {
-                await command.Invoke(t);
-                t.Commit();
-            }
-            catch
-            {
-                t.Rollback();
-                throw;
-            }
-        }
+        public Task Execute(Func<IDbTransaction, Task> command) => Execute((c, t) => command(c));
 
         public async Task Execute(Func<IDbTransaction, CancellationToken, Task> command)
         {
@@ -165,11 +145,7 @@ namespace Rrs.Data
             }
         }
 
-        public async Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            await command.Invoke(c, parameter);
-        }
+        public Task Execute<T>(Func<IDbConnection, T, Task> command, T parameter) => Execute((c, p, t) => command(c, p), parameter);
 
         public async Task Execute<T>(Func<IDbConnection, T, CancellationToken, Task> command, T parameter)
         {
@@ -177,21 +153,7 @@ namespace Rrs.Data
             await command.Invoke(c, parameter, _cancellationToken);
         }
 
-        public async Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            using var t = c.BeginTransaction(_isolationLevel);
-            try
-            {
-                await command.Invoke(t, parameter);
-                t.Commit();
-            }
-            catch
-            {
-                t.Rollback();
-                throw;
-            }
-        }
+        public Task Execute<T>(Func<IDbTransaction, T, Task> command, T parameter) => Execute((c, p, t) => command(c, p), parameter);
 
         public async Task Execute<T>(Func<IDbTransaction, T, CancellationToken, Task> command, T parameter)
         {
@@ -209,11 +171,7 @@ namespace Rrs.Data
             }
         }
 
-        public async Task<T> Execute<T>(Func<IDbConnection, Task<T>> query)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            return await query.Invoke(c);
-        }
+        public Task<T> Execute<T>(Func<IDbConnection, Task<T>> query) => Execute((c, t) => query(c));
 
         public async Task<T> Execute<T>(Func<IDbConnection, CancellationToken, Task<T>> query)
         {
@@ -221,22 +179,7 @@ namespace Rrs.Data
             return await query.Invoke(c, _cancellationToken);
         }
 
-        public async Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            using var t = c.BeginTransaction(_isolationLevel);
-            try
-            {
-                var r = await query.Invoke(t);
-                t.Commit();
-                return r;
-            }
-            catch
-            {
-                t.Rollback();
-                throw;
-            }
-        }
+        public Task<T> Execute<T>(Func<IDbTransaction, Task<T>> query) => Execute((c, t) => query(c));
 
         public async Task<T> Execute<T>(Func<IDbTransaction, CancellationToken, Task<T>> query)
         {
@@ -255,11 +198,7 @@ namespace Rrs.Data
             }
         }
 
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            return await query.Invoke(c, parameter);
-        }
+        public Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, Task<TOut>> query, TIn parameter) => Execute((c, p, t) => query(c, p), parameter);
 
         public async Task<TOut> Execute<TIn, TOut>(Func<IDbConnection, TIn, CancellationToken, Task<TOut>> query, TIn parameter)
         {
@@ -267,22 +206,7 @@ namespace Rrs.Data
             return await query.Invoke(c, parameter, _cancellationToken);
         }
 
-        public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter)
-        {
-            using var c = await ConnectionFactory.OpenConnectionAsync();
-            using var t = c.BeginTransaction(_isolationLevel);
-            try
-            {
-                var r = await query.Invoke(t, parameter);
-                t.Commit();
-                return r;
-            }
-            catch
-            {
-                t.Rollback();
-                throw;
-            }
-        }
+        public Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, Task<TOut>> query, TIn parameter) => Execute((c, p, t) => query(c, p), parameter);
 
         public async Task<TOut> Execute<TIn, TOut>(Func<IDbTransaction, TIn, CancellationToken, Task<TOut>> query, TIn parameter)
         {
