@@ -63,7 +63,7 @@ namespace Tests.Rrs.Data
         [Test]
         public Task TestCommandAsyncWithAnObjectParameter() => _q.Execute(CommandAsync, new TestObject(67, "Barry"));
         [Test]
-        public Task TestCommandAsyncWithAnObjectParameterAndCancellationToken() => _q.Execute(CommandAsync, new TestObject(67, "Barry"), _cts.Token);
+        public Task TestCommandAsyncWithAnObjectParameterAndCancellationToken() => _q.Execute(CommandAsync, new TestObject(67, "Barry"));
 
         private static Task CommandAsync(IDbConnection c, TestObject p)
         {
@@ -75,7 +75,7 @@ namespace Tests.Rrs.Data
         }
 
         [Test]
-        public Task TestCommandAsyncAccepts2ParametersAndCancellationToken() => _q.Execute(CommandAsyncWith2ParamtersAndCancellationToken, 5, 2, _cts.Token);
+        public Task TestCommandAsyncAccepts2ParametersAndCancellationToken() => _q.Execute(CommandAsyncWith2ParamtersAndCancellationToken, 5, 2);
 
         private Task CommandAsyncWith2ParamtersAndCancellationToken(IDbConnection c, int a, int b, CancellationToken cancellationToken)
         {
@@ -143,7 +143,6 @@ namespace Tests.Rrs.Data
             return Task.FromResult(new TestObject(p, "Gaaary"));
         }
 
-
         [Test]
         public async Task QueryAsyncAccepts2Parameters()
         {
@@ -161,12 +160,12 @@ namespace Tests.Rrs.Data
         [Test]
         public async Task QueryAsyncAccepts2ParametersAndCancellationToken()
         {
-            var r = await _q.Execute(QueryAsyncWith2ParamtersAndCancellationToken, 5, 2, CancellationToken.None);
+            var r = await _q.Execute(QueryAsyncWith2ParamtersAndCancellationToken, 5, 2);
             Assert.AreEqual(7, r.Id);
             Assert.AreEqual("Boris", r.Name);
         }
 
-        private Task<TestObject> QueryAsyncWith2ParamtersAndCancellationToken(IDbConnection c, int a, int b, CancellationToken cancellationToken = default)
+        private Task<TestObject> QueryAsyncWith2ParamtersAndCancellationToken(IDbConnection c, int a, int b, CancellationToken cancellationToken)
         {
             Assert.IsNotNull(c);
             return Task.FromResult(new TestObject(a + b, "Boris"));
