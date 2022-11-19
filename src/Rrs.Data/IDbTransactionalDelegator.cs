@@ -5,9 +5,9 @@ namespace Rrs.Data
 {
     public interface IDbTransactionalDelegator
     {
-        void Execute(Action<IDbTransaction> command);
-        void Execute<T>(Action<IDbTransaction, T> command, T parameter);
-        T Execute<T>(Func<IDbTransaction, T> query);
-        TOut Execute<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter);
+        void Transaction(Action<IDbTransaction> command);
+        void Transaction<T>(Action<IDbTransaction, T> command, T parameter);
+        T Transaction<T>(Func<IDbTransaction, T> query);
+        TOut Transaction<TIn, TOut>(Func<IDbTransaction, TIn, TOut> query, TIn parameter);
     }
 }

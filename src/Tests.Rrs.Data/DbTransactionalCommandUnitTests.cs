@@ -21,7 +21,7 @@ namespace Tests.Rrs.Data
         [Test]
         public void CommandGetsAConnectionAndATransactionAndCommits()
         {
-            _q.Execute(Command);
+            _q.Transaction(Command);
             _f.MockDbTransaction.Verify(o => o.Commit());
             _f.MockDbTransaction.Verify(o => o.Rollback(), Times.Never);
 
@@ -34,11 +34,11 @@ namespace Tests.Rrs.Data
         [Test]
         public void CommandRollsbackOnException()
         {
-            Assert.Throws<Exception>(() => _q.Execute(ExceptionCommand));
+            Assert.Throws<Exception>(() => _q.Transaction(Command));
             _f.MockDbTransaction.Verify(o => o.Rollback());
             _f.MockDbTransaction.Verify(o => o.Commit(), Times.Never);
 
-            static void ExceptionCommand(IDbTransaction t)
+            static void Command(IDbTransaction t)
             {
                 throw new Exception();
             }
@@ -47,7 +47,7 @@ namespace Tests.Rrs.Data
         [Test]
         public void TestCommandWithABasicParameter()
         {
-            _q.Execute(Command, new DateTime(2001, 2, 3, 4, 5, 6));
+            _q.Transaction(Command, new DateTime(2001, 2, 3, 4, 5, 6));
 
             static void Command(IDbTransaction t, DateTime p)
             {
@@ -59,7 +59,7 @@ namespace Tests.Rrs.Data
         [Test]
         public void TestCommandWithAnObjectParameter()
         {
-            _q.Execute(Command, new TestObject(4056, "Mildred"));
+            _q.Transaction(Command, new TestObject(4056, "Mildred"));
 
             static void Command(IDbTransaction c, TestObject p)
             {
