@@ -24,11 +24,11 @@ namespace Tests.Rrs.Data
             _q.Execute(Command);
             _f.MockDbTransaction.Verify(o => o.Commit());
             _f.MockDbTransaction.Verify(o => o.Rollback(), Times.Never);
-        }
 
-        private static void Command(IDbTransaction t)
-        {
-            Assert.IsNotNull(t);
+            static void Command(IDbTransaction t)
+            {
+                Assert.IsNotNull(t);
+            }
         }
 
         [Test]
@@ -37,30 +37,36 @@ namespace Tests.Rrs.Data
             Assert.Throws<Exception>(() => _q.Execute(ExceptionCommand));
             _f.MockDbTransaction.Verify(o => o.Rollback());
             _f.MockDbTransaction.Verify(o => o.Commit(), Times.Never);
-        }
 
-        private static void ExceptionCommand(IDbTransaction t)
-        {
-            throw new Exception();
-        }
-
-        [Test]
-        public void TestCommandWithABasicParameter() => _q.Execute(Command, new DateTime(2001,2,3,4,5,6));
-
-        private static void Command(IDbTransaction t, DateTime p)
-        {
-            Assert.IsNotNull(t);
-            Assert.AreEqual(new DateTime(2001, 2, 3, 4, 5, 6), p);
+            static void ExceptionCommand(IDbTransaction t)
+            {
+                throw new Exception();
+            }
         }
 
         [Test]
-        public void TestCommandWithAnObjectParameter() => _q.Execute(Command, new TestObject(4056, "Mildred"));
-
-        private static void Command(IDbConnection c, TestObject p)
+        public void TestCommandWithABasicParameter()
         {
-            Assert.IsNotNull(c);
-            Assert.AreEqual(4056, p.Id);
-            Assert.AreEqual("Mildred", p.Name);
+            _q.Execute(Command, new DateTime(2001, 2, 3, 4, 5, 6));
+
+            static void Command(IDbTransaction t, DateTime p)
+            {
+                Assert.IsNotNull(t);
+                Assert.AreEqual(new DateTime(2001, 2, 3, 4, 5, 6), p);
+            }
+        }
+
+        [Test]
+        public void TestCommandWithAnObjectParameter()
+        {
+            _q.Execute(Command, new TestObject(4056, "Mildred"));
+
+            static void Command(IDbTransaction c, TestObject p)
+            {
+                Assert.IsNotNull(c);
+                Assert.AreEqual(4056, p.Id);
+                Assert.AreEqual("Mildred", p.Name);
+            }
         }
     }
 }
