@@ -8,5 +8,6 @@ namespace Rrs.Data
         IDbConnectionFactory ConnectionFactory { get; }
         IDbDelegator WithCancellationToken(CancellationToken cancellationToken);
         IDbDelegator WithIsolationLevel(IsolationLevel isolationLevel);
+        IDbDelegator UseDatabase(string databaseName);
     }
 }

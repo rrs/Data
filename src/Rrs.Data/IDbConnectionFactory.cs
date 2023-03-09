@@ -10,5 +10,6 @@ namespace Rrs.Data
         IDbConnection OpenConnection();
         IConnectionProperties ConnectionProperties { get; }
         Task<IDbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default);
+        IDbConnectionFactory UseDatabase(string databaseName);
     }
 }
